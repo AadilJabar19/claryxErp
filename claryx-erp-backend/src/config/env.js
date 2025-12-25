@@ -1,3 +1,4 @@
+require('dotenv').config();
 const requiredVars = ['DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME', 'JWT_SECRET', 'PORT'];
 
 for (const varName of requiredVars) {

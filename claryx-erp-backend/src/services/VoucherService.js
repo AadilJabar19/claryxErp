@@ -1,11 +1,13 @@
 const BaseService = require('./BaseService');
+const AuditLogService = require('./AuditLogService');
 
 class VoucherService extends BaseService {
   constructor(db) {
     super(db);
+    this.auditLogService = new AuditLogService();
   }
 
-  async createDraftVoucher(companyId, voucherData) {
+  async createDraftVoucher(companyId, voucherData, userId) {
     return await this.withTransaction(async (trx) => {
       await this.validateCompany(companyId, trx);
       
@@ -31,6 +33,18 @@ class VoucherService extends BaseService {
       };
 
       const [voucherId] = await trx('vouchers').insert(voucher);
+      
+      if (userId) {
+        await this.auditLogService.insertLog({
+          companyId,
+          userId,
+          entityType: 'VOUCHER',
+          entityId: voucherId,
+          action: 'CREATE_VOUCHER',
+          metadata: { voucherNumber, voucherTypeId: voucherData.voucher_type_id }
+        }, trx);
+      }
+      
       return await this.getVoucherById(companyId, voucherId, trx);
     });
   }
@@ -89,7 +103,7 @@ class VoucherService extends BaseService {
     return { isValid: true, totalAmount: totalDebits };
   }
 
-  async postVoucher(companyId, voucherId) {
+  async postVoucher(companyId, voucherId, userId) {
     return await this.withTransaction(async (trx) => {
       const validation = await this.validateVoucherForPosting(companyId, voucherId);
       
@@ -114,6 +128,17 @@ class VoucherService extends BaseService {
           .where('ledger_id', line.ledger_id)
           .increment('debit_balance', line.debit_amount || 0)
           .increment('credit_balance', line.credit_amount || 0);
+      }
+
+      if (userId) {
+        await this.auditLogService.insertLog({
+          companyId,
+          userId,
+          entityType: 'VOUCHER',
+          entityId: voucherId,
+          action: 'POST_VOUCHER',
+          metadata: { totalAmount: validation.totalAmount }
+        }, trx);
       }
 
       return await this.getVoucherById(companyId, voucherId, trx);

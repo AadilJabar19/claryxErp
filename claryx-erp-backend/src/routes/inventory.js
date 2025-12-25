@@ -1,14 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const inventoryController = require('../controllers/inventoryController');
-const authMiddleware = require('../middleware/authMiddleware');
+const InventoryController = require('../controllers/InventoryController');
+const authMiddleware = require('../middleware/auth');
+
+const inventoryController = new InventoryController();
 
 router.use(authMiddleware);
 
-router.get('/', inventoryController.getAllInventory);
-router.get('/:id', inventoryController.getInventoryById);
-router.post('/', inventoryController.createInventory);
-router.post('/:id/post', inventoryController.updateInventory);
-router.post('/:id/reverse', inventoryController.deleteInventory);
+router.post('/items', inventoryController.createItem.bind(inventoryController));
+router.post('/stock-movement', inventoryController.createStockMovement.bind(inventoryController));
+router.get('/stock-balance/:itemId', inventoryController.getStockBalance.bind(inventoryController));
+router.get('/stock-balances', inventoryController.getStockBalances.bind(inventoryController));
+router.post('/adjust-stock', inventoryController.adjustStock.bind(inventoryController));
 
 module.exports = router;

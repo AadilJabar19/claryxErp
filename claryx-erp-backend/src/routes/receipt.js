@@ -1,14 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const receiptController = require('../controllers/receiptController');
-const authMiddleware = require('../middleware/authMiddleware');
+const ReceiptController = require('../controllers/ReceiptController');
+const authMiddleware = require('../middleware/auth');
+
+const receiptController = new ReceiptController();
 
 router.use(authMiddleware);
 
-router.get('/', receiptController.getAllReceipts);
-router.get('/:id', receiptController.getReceiptById);
-router.post('/', receiptController.createReceipt);
-router.post('/:id/post', receiptController.updateReceipt);
-router.post('/:id/reverse', receiptController.deleteReceipt);
+router.post('/', receiptController.createReceipt.bind(receiptController));
+router.post('/:voucherId/reverse', receiptController.reverseReceipt.bind(receiptController));
 
 module.exports = router;

@@ -11,17 +11,7 @@ exports.up = function(knex) {
       // CHECK constraint for positive quantity
       table.check('quantity > 0', [], 'chk_stock_movements_quantity_positive');
     })
-    .alterTable('vouchers', function(table) {
-      // Add computed columns for total debit and credit validation
-      table.check(`
-        CASE 
-          WHEN is_posted = true THEN 
-            (SELECT COALESCE(SUM(debit_amount), 0) FROM voucher_lines WHERE voucher_id = vouchers.id) = 
-            (SELECT COALESCE(SUM(credit_amount), 0) FROM voucher_lines WHERE voucher_id = vouchers.id)
-          ELSE true 
-        END
-      `, [], 'chk_vouchers_balanced_when_posted');
-    })
+
     .raw(`
       -- Update existing foreign key constraints to ON DELETE RESTRICT for accounting tables
       ALTER TABLE voucher_lines DROP CONSTRAINT voucher_lines_ledger_id_foreign;
@@ -54,9 +44,7 @@ exports.down = function(knex) {
     .alterTable('stock_movements', function(table) {
       table.dropChecks(['chk_stock_movements_quantity_positive']);
     })
-    .alterTable('vouchers', function(table) {
-      table.dropChecks(['chk_vouchers_balanced_when_posted']);
-    })
+
     .raw(`
       -- Revert foreign key constraints back to original behavior
       ALTER TABLE voucher_lines DROP CONSTRAINT voucher_lines_ledger_id_foreign;

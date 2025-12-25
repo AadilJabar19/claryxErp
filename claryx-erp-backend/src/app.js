@@ -7,6 +7,7 @@ const salesRoutes = require('./routes/sales');
 const purchaseRoutes = require('./routes/purchase');
 const receiptRoutes = require('./routes/receipt');
 const inventoryRoutes = require('./routes/inventory');
+const reportsRoutes = require('./routes/reports');
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use('/api/sales', auth, salesRoutes);
 app.use('/api/purchases', auth, purchaseRoutes);
 app.use('/api/receipts', auth, receiptRoutes);
 app.use('/api/inventory', auth, inventoryRoutes);
+app.use('/api/reports', reportsRoutes);
 
 app.use(errorHandler);
 

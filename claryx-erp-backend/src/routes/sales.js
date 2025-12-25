@@ -1,14 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const salesController = require('../controllers/salesController');
-const authMiddleware = require('../middleware/authMiddleware');
+const SalesController = require('../controllers/SalesController');
+const authMiddleware = require('../middleware/auth');
+
+const salesController = new SalesController();
 
 router.use(authMiddleware);
 
-router.get('/', salesController.getAllSales);
-router.get('/:id', salesController.getSalesById);
-router.post('/', salesController.createSales);
-router.post('/:id/post', salesController.updateSales);
-router.post('/:id/reverse', salesController.deleteSales);
+router.post('/', salesController.createSalesInvoice.bind(salesController));
+router.post('/:voucherId/reverse', salesController.reverseSalesInvoice.bind(salesController));
 
 module.exports = router;

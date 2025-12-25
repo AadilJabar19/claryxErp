@@ -1,14 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const purchaseController = require('../controllers/purchaseController');
-const authMiddleware = require('../middleware/authMiddleware');
+const PurchaseController = require('../controllers/PurchaseController');
+const authMiddleware = require('../middleware/auth');
+
+const purchaseController = new PurchaseController();
 
 router.use(authMiddleware);
 
-router.get('/', purchaseController.getAllPurchases);
-router.get('/:id', purchaseController.getPurchaseById);
-router.post('/', purchaseController.createPurchase);
-router.post('/:id/post', purchaseController.updatePurchase);
-router.post('/:id/reverse', purchaseController.deletePurchase);
+router.post('/', purchaseController.createPurchaseInvoice.bind(purchaseController));
+router.post('/:voucherId/reverse', purchaseController.reversePurchaseInvoice.bind(purchaseController));
 
 module.exports = router;
